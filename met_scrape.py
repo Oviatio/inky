@@ -29,7 +29,8 @@ except ImportError:
     sys.exit(1)
 
 # --- Configuration ---
-# Departments: 4(Arms/Armor), 6(Asian), 10(Egyptian), 11(European), 13(Greek/Roman), 17(Islamic)
+# Departments: 1(American Decorative Arts), 3(Ancient Near Eastern Art) 4(Arms/Armor), 5(Arts of Africa, Oceania, and the Americas), 6(Asian), 7(Cloisters), 8(Costume Institute), 9(Drawings and Prints), 10(Egyptian), 11(European), 12(European Sculpture and Decorative Arts)
+# 13(Greek/Roman), 14(Islamic Art), 15(Robert Lehman), 16(The Libraries), 17(Medieval Art), 18(Musical Instruments), 19(Photographs), 21(Modern)
 DEPARTMENTS = [4, 6, 10, 11, 13, 17]
 MET_SEARCH_URL = "https://collectionapi.metmuseum.org/public/collection/v1/search"
 MET_OBJECT_URL = "https://collectionapi.metmuseum.org/public/collection/v1/objects/"
@@ -124,4 +125,5 @@ def main():
     print("Done! Nothing was saved to disk, so nothing to delete.")
 
 if __name__ == "__main__":
+
     main()
