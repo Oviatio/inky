@@ -1,76 +1,83 @@
-# 🖼️ Inky Impression Image Display Script
+🖼️ Inky Impression Display Suite
 
-This script is designed to display a **randomly selected PNG image** from a specified directory onto a **Pimoroni Inky Impression e-ink display**. It automatically detects the connected Inky display and resizes the image to fit its resolution.
+A collection of Python scripts designed for the Pimoroni Inky Impression (7.3", 5.7", or 4.0") to transform your e-ink display into a rotating art gallery. This suite includes tools to pull masterpieces from the Metropolitan Museum of Art or cycle through your personal local collection.
+🛠️ Hardware & Setup
+1. Hardware Requirements
 
------
+    Raspberry Pi (Zero, 3, 4, or 5)
 
-## 🛠️ Requirements and Setup
+    Pimoroni Inky Impression display
 
-### 1\. Hardware
+    SPI Interface enabled (via sudo raspi-config)
 
-  * A **Pimoroni Inky Impression** display (e.g., Inky Impression 7.3", 5.7", or 4.0").
-  * A compatible single-board computer, such as a Raspberry Pi.
+2. Python Dependencies
 
-### 2\. Python Dependencies
+Install the necessary libraries for display control, web requests, and image processing:
+Bash
 
-You need the `inky` library (for display control) and `Pillow` (for image manipulation).
+pip3 install inky[rpi] requests Pillow
 
-```bash
-pip3 install inky[rpi] Pillow
-```
+🚀 The Scripts
+1. Met Museum Scraper (met_scrape.py)
 
-*(The `[rpi]` extra installs dependencies specifically for Raspberry Pi use.)*
+This script fetches random, public-domain masterpieces from the Metropolitan Museum of Art’s Open Access collection.
 
-### 3\. Image Directory
+    Curated Departments: Pulls from user defined array of departments
 
-The script is configured to look for images in a specific path.
+    Information Overlay: Optionally adds a high-contrast black "plaque" at the bottom with the Title and Artist.
 
-  * **Create the image folder:**
-    ```bash
+    Auto-Cleanup: Converts the image to PNG for processing but automatically deletes the file after it is displayed to save disk space.
+
+Run it:
+Bash
+
+python3 met_scrape.py
+
+2. Local Random Gallery (random_image.py)
+
+Displays a randomly selected .png image from a specified directory on your Raspberry Pi.
+
+    Custom Library: Perfect for personal photos or specific art collections.
+
+    Saturation Control: Supports command-line arguments to tweak color intensity.
+
+    Setup: Create the image folder and add your files:
+    Bash
+
     mkdir -p /home/display/inky/images
-    ```
-  * **Add your images:** Place your desired **.png** files into this directory: `/home/display/inky/images`.
 
------
+Run it:
+Bash
 
-## 🚀 How to Run the Script
+# Basic run
+python3 random_image.py
 
-### 1\. Basic Execution
+# Run with maximum color saturation
+python3 random_image.py --saturation 1.0
 
-The script will automatically choose a random `.png` file from the images directory, resize it, and display it on the Inky Impression screen.
+⚙️ Technical Overview
+Feature	Met Scraper (met_scrape.py)	Local Gallery (random_image.py)
+Source	Metropolitan Museum API	/home/display/inky/images
+Image Handling	ImageOps.fit (Center crop/fill)	image.resize (Stretch to fit)
+Resolution	Hardcoded 800×480	Auto-detected via inky.resolution
+Storage	Temporary (Deleted after use)	Permanent (Reads from disk)
+Overlay	Artist & Title plaque	None
+📅 Automation (Cron Job)
 
-```bash
-python3 randomimage.py
-```
+To make your display update automatically (e.g., every morning at 8:00 AM), use a cron job.
 
-### 2\. Using Arguments
+    Open crontab: crontab -e
 
-The script supports optional arguments to control the color display and to specify a single file instead of choosing randomly.
+    Add a line for your preferred script:
+    Bash
 
-#### A. Adjusting Color Saturation (`--saturation`, `-s`)
+    # Update with a new Met painting every morning
+    0 8 * * * /usr/bin/python3 /home/display/inky/scripts/met_scrape.py
 
-You can control the intensity of the colors displayed on the e-ink screen. The default is `0.5`.
+📝 Notes
 
-| Value Range | Effect |
-| :--- | :--- |
-| **0.0** | Grayscale/B\&W |
-| **0.5** (Default) | Standard color mapping |
-| **1.0** | Maximum saturation |
+    Resolution: The Met script is optimized for the 7.3" display (800×480 pixels).
 
-**Example:** Running the script with maximum saturation:
+    E-Ink Refresh: Updates take approximately 15–40 seconds depending on your model. This is normal for multi-color e-ink.
 
-```bash
-python3 randomimage.py --saturation 1.0
-```
-## ⚙️ Code Overview
-
-| Section | Functionality |
-| :--- | :--- |
-| `inky = auto(...)` | **Auto-detects** the specific Inky Impression display model connected and sets up the communication. |
-| `path_obj.glob('*.png')` | Finds all files ending in `.png` in the `/home/display/inky/images` folder. |
-| `random.choice(png_files)` | Selects a **single, random** image file from the list. |
-| `image.resize(inky.resolution)` | **Resizes** the selected image to match the precise resolution of the detected Inky screen (e.g., $800 \times 480$). |
-| `inky.set_image(..., saturation=...)` | Applies the image data and the specified color saturation to the display's internal buffer. |
-| `inky.show()` | **Updates the e-ink screen** with the contents of the buffer, making the image visible. |
-
------
+    Formatting: If using the Met script, ensure you have fonts installed at /usr/share/fonts/truetype/dejavu/.
