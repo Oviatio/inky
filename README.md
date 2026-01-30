@@ -1,83 +1,84 @@
 🖼️ Inky Impression Display Suite
 
-A collection of Python scripts designed for the Pimoroni Inky Impression (7.3", 5.7", or 4.0") to transform your e-ink display into a rotating art gallery. This suite includes tools to pull masterpieces from the Metropolitan Museum of Art or cycle through your personal local collection.
+Transform your Pimoroni Inky Impression (7.3", 5.7", or 4.0") into a rotating digital art gallery. This suite provides two distinct ways to enjoy art: pulling masterpieces directly from the Metropolitan Museum of Art or cycling through your own curated local collection.
 🛠️ Hardware & Setup
 1. Hardware Requirements
 
-    Raspberry Pi (Zero, 3, 4, or 5)
+    Display: Pimoroni Inky Impression e-ink display.
 
-    Pimoroni Inky Impression display
+    Computer: Raspberry Pi (Zero, 3, 4, or 5).
 
-    SPI Interface enabled (via sudo raspi-config)
+    Configuration: SPI Interface must be enabled via sudo raspi-config (Interfacing Options > SPI).
 
 2. Python Dependencies
 
-Install the necessary libraries for display control, web requests, and image processing:
+Run the following command to install the required libraries for display control, web requests, and image processing:
 Bash
 
 pip3 install inky[rpi] requests Pillow
 
 🚀 The Scripts
-1. Met Museum Scraper (met_scrape.py)
+🏛️ Met Museum Scraper (met_scrape.py)
 
-This script fetches random, public-domain masterpieces from the Metropolitan Museum of Art’s Open Access collection.
+Fetches random, public-domain masterpieces from the Metropolitan Museum of Art’s Open Access collection.
 
-    Curated Departments: Pulls from user defined array of departments
+    Smart Filtering: Pulls from a user-defined array of department IDs (e.g., European Paintings, Egyptian Art).
 
-    Information Overlay: Optionally adds a high-contrast black "plaque" at the bottom with the Title and Artist.
+    Information Overlay: Automatically adds a high-contrast "plaque" at the bottom-left containing the Title and Artist.
 
-    Auto-Cleanup: Converts the image to PNG for processing but automatically deletes the file after it is displayed to save disk space.
+    No Disk Trace: Converts images to PNG in-memory; any temporary files are deleted immediately after the display updates to preserve SD card health.
 
-Run it:
+Execution:
 Bash
 
 python3 met_scrape.py
 
-2. Local Random Gallery (random_image.py)
+📁 Local Random Gallery (random_image.py)
 
-Displays a randomly selected .png image from a specified directory on your Raspberry Pi.
+Cycles through your personal collection of images stored on the Raspberry Pi.
 
-    Custom Library: Perfect for personal photos or specific art collections.
+    Custom Library: Ideal for family photos, digital art, or custom-designed PNGs.
 
-    Saturation Control: Supports command-line arguments to tweak color intensity.
+    Saturation Control: Includes CLI arguments to tweak color intensity for the e-ink medium.
 
-    Setup: Create the image folder and add your files:
+    Setup: Place your .png files in the images directory:
     Bash
 
     mkdir -p /home/display/inky/images
 
-Run it:
+Execution:
 Bash
 
-# Basic run
+# Display with default saturation (0.5)
 python3 random_image.py
 
-# Run with maximum color saturation
+# Display with maximum color intensity
 python3 random_image.py --saturation 1.0
 
 ⚙️ Technical Overview
 Feature	Met Scraper (met_scrape.py)	Local Gallery (random_image.py)
-Source	Metropolitan Museum API	/home/display/inky/images
-Image Handling	ImageOps.fit (Center crop/fill)	image.resize (Stretch to fit)
-Resolution	Hardcoded 800×480	Auto-detected via inky.resolution
-Storage	Temporary (Deleted after use)	Permanent (Reads from disk)
-Overlay	Artist & Title plaque	None
-📅 Automation (Cron Job)
+Data Source	Metropolitan Museum API	/home/display/inky/images
+Scaling	ImageOps.fit (Center crop & fill)	image.resize (Stretch to fit)
+Resolution	Optimized for 800x480	Auto-detected via inky.resolution
+Disk Impact	Clean (Deletes after use)	Persistent (Reads existing files)
+Overlay	Artwork Metadata Plaque	None
+📅 Automation
 
-To make your display update automatically (e.g., every morning at 8:00 AM), use a cron job.
+Automate your gallery to update every morning (e.g., 8:00 AM) using a cron job.
 
-    Open crontab: crontab -e
+    Enter the crontab editor: crontab -e
 
-    Add a line for your preferred script:
-    Bash
+    Add your preferred script path:
 
-    # Update with a new Met painting every morning
-    0 8 * * * /usr/bin/python3 /home/display/inky/scripts/met_scrape.py
+Bash
 
-📝 Notes
+# Example: Daily 8AM Museum Update
+0 8 * * * /usr/bin/python3 /home/display/inky/scripts/met_scrape.py
 
-    Resolution: The Met script is optimized for the 7.3" display (800×480 pixels).
+📝 Important Notes
 
-    E-Ink Refresh: Updates take approximately 15–40 seconds depending on your model. This is normal for multi-color e-ink.
+    Refresh Time: E-ink updates are not instant. Expect a 15–40 second refresh cycle as the 7-color palette settles.
 
-    Formatting: If using the Met script, ensure you have fonts installed at /usr/share/fonts/truetype/dejavu/.
+    Fonts: The met_scrape.py script looks for fonts in /usr/share/fonts/truetype/dejavu/. Ensure these are installed for the information plaque to render correctly.
+
+    Aspect Ratio: For the random_image.py script, use images matching your screen's aspect ratio to avoid stretching.
